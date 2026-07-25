@@ -1,6 +1,6 @@
 {
     "name": "Journal Tax Policy",
-    "version": "19.0.1.0.0",
+    "version": "17.0.1.0.0",
     "category": "Accounting/Accounting",
     "summary": "Decide per sales/purchase journal whether its documents carry taxes",
     "author": "Aceleradora-Latam",
