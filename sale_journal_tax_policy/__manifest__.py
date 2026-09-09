@@ -7,6 +7,9 @@
     "website": "https://github.com/aceleradora-la/odoo-journal-tax-policy",
     "license": "AGPL-3",
     "depends": ["account_journal_tax_policy", "sale"],
+    "data": [
+        "views/sale_order_views.xml",
+    ],
     "installable": True,
     "application": False,
     # Bridge module: it shows up on its own once both sides are installed, so
