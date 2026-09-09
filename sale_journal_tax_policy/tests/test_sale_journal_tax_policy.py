@@ -46,13 +46,13 @@ class TestSaleJournalTaxPolicy(AccountTestInvoicingCommon):
 
     def test_standard_journal_keeps_the_product_taxes(self):
         order = self._create_order(self.sale_journal)
-        self.assertEqual(order.order_line.tax_ids, self.tax_sale_a)
+        self.assertEqual(order.order_line.tax_id, self.tax_sale_a)
 
     def test_empty_journal_keeps_the_product_taxes(self):
         """An empty journal means 'whatever the invoice picks', so stay standard."""
         order = self._create_order()
         self.assertFalse(order.journal_id)
-        self.assertEqual(order.order_line.tax_ids, self.tax_sale_a)
+        self.assertEqual(order.order_line.tax_id, self.tax_sale_a)
 
     def test_switching_between_two_standard_journals_keeps_manual_taxes(self):
         other_journal = self.env["account.journal"].create(
@@ -64,12 +64,12 @@ class TestSaleJournalTaxPolicy(AccountTestInvoicingCommon):
             }
         )
         order = self._create_order(self.sale_journal)
-        order.order_line.tax_ids = False
+        order.order_line.tax_id = False
 
         order.journal_id = other_journal
 
         self.assertFalse(
-            order.order_line.tax_ids,
+            order.order_line.tax_id,
             "No 'no_tax' journal was involved, so we must not touch the taxes.",
         )
 
@@ -79,7 +79,7 @@ class TestSaleJournalTaxPolicy(AccountTestInvoicingCommon):
 
     def test_no_tax_journal_drops_the_product_taxes(self):
         order = self._create_order(self.no_tax_journal)
-        self.assertFalse(order.order_line.tax_ids)
+        self.assertFalse(order.order_line.tax_id)
         self.assertEqual(order.amount_total, order.amount_untaxed)
 
     def test_line_added_after_the_journal_has_no_taxes(self):
@@ -96,27 +96,27 @@ class TestSaleJournalTaxPolicy(AccountTestInvoicingCommon):
             }
         )
 
-        self.assertFalse(order.order_line.tax_ids)
+        self.assertFalse(order.order_line.tax_id)
 
     def test_no_tax_journal_ignores_the_fiscal_position(self):
         """partner_b maps tax_sale_a to tax_sale_b, we still want nothing."""
         order = self._create_order(self.no_tax_journal, partner=self.partner_b)
         self.assertEqual(order.fiscal_position_id, self.fiscal_pos_a)
-        self.assertFalse(order.order_line.tax_ids)
+        self.assertFalse(order.order_line.tax_id)
 
     def test_no_tax_journal_drops_explicitly_written_taxes(self):
         order = self._create_order(
             self.no_tax_journal,
-            line_vals={"tax_ids": [Command.set(self.tax_sale_a.ids)]},
+            line_vals={"tax_id": [Command.set(self.tax_sale_a.ids)]},
         )
-        self.assertFalse(order.order_line.tax_ids)
+        self.assertFalse(order.order_line.tax_id)
 
     def test_no_tax_journal_drops_taxes_added_afterwards(self):
         order = self._create_order(self.no_tax_journal)
 
-        order.order_line.tax_ids = [Command.set(self.tax_sale_a.ids)]
+        order.order_line.tax_id = [Command.set(self.tax_sale_a.ids)]
 
-        self.assertFalse(order.order_line.tax_ids)
+        self.assertFalse(order.order_line.tax_id)
 
     # ------------------------------------------------------------------
     # Switching the journal back and forth
@@ -124,33 +124,33 @@ class TestSaleJournalTaxPolicy(AccountTestInvoicingCommon):
 
     def test_switching_to_a_no_tax_journal_drops_the_taxes(self):
         order = self._create_order(self.sale_journal)
-        self.assertEqual(order.order_line.tax_ids, self.tax_sale_a)
+        self.assertEqual(order.order_line.tax_id, self.tax_sale_a)
 
         order.journal_id = self.no_tax_journal
 
-        self.assertFalse(order.order_line.tax_ids)
+        self.assertFalse(order.order_line.tax_id)
         self.assertTrue(order.taxes_removed_by_journal)
         self.assertEqual(order.amount_total, order.amount_untaxed)
 
     def test_switching_back_restores_the_standard_taxes(self):
         order = self._create_order(self.sale_journal)
         order.journal_id = self.no_tax_journal
-        self.assertFalse(order.order_line.tax_ids)
+        self.assertFalse(order.order_line.tax_id)
 
         order.journal_id = self.sale_journal
 
-        self.assertEqual(order.order_line.tax_ids, self.tax_sale_a)
+        self.assertEqual(order.order_line.tax_id, self.tax_sale_a)
         self.assertFalse(order.taxes_removed_by_journal)
 
     def test_switching_back_applies_the_fiscal_position_mapping(self):
         order = self._create_order(self.sale_journal, partner=self.partner_b)
-        self.assertEqual(order.order_line.tax_ids, self.tax_sale_b)
+        self.assertEqual(order.order_line.tax_id, self.tax_sale_b)
         order.journal_id = self.no_tax_journal
-        self.assertFalse(order.order_line.tax_ids)
+        self.assertFalse(order.order_line.tax_id)
 
         order.journal_id = self.sale_journal
 
-        self.assertEqual(order.order_line.tax_ids, self.tax_sale_b)
+        self.assertEqual(order.order_line.tax_id, self.tax_sale_b)
 
     # ------------------------------------------------------------------
     # End to end: the invoice built from the order

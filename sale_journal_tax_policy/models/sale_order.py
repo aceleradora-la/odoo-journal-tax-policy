@@ -40,15 +40,15 @@ class SaleOrder(models.Model):
         for order in self:
             lines = order._taxable_order_lines()
             if order._excludes_taxes():
-                to_clear = lines.filtered("tax_ids")
+                to_clear = lines.filtered("tax_id")
                 if to_clear:
-                    to_clear.tax_ids = False
+                    to_clear.tax_id = False
                 if not order.taxes_removed_by_journal:
                     order.taxes_removed_by_journal = True
             elif order.taxes_removed_by_journal:
                 # Our own override of this compute leaves the standard values
                 # alone now that the journal allows taxes again.
-                lines._compute_tax_ids()
+                lines._compute_tax_id()
                 order.taxes_removed_by_journal = False
 
     @api.onchange("journal_id")
