@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_move_form" model="ir.ui.view">
+        <field name="name">account.move.form.tax.policy</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_move_form"/>
+        <field name="arch" type="xml">
+            <!-- Nothing is displayed here. The flag has to travel to the
+                 browser and back, because a field that is not in the view
+                 cannot survive an onchange round trip: the ORM only returns
+                 and accepts the fields of the view. Without this, switching
+                 to a journal without taxes and back again before saving would
+                 leave the document with no taxes.
+
+                 The anchor is the technical journal_id field that sits right
+                 under the sheet in 17.0, 18.0 and 19.0. It is the first of the
+                 two journal_id nodes of the view, hence the [1]. -->
+            <xpath expr="(//field[@name='journal_id'])[1]" position="after">
+                <field name="taxes_removed_by_journal" invisible="1"/>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

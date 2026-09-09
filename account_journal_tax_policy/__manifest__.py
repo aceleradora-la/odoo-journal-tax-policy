@@ -9,6 +9,7 @@
     "depends": ["account"],
     "data": [
         "views/account_journal_views.xml",
+        "views/account_move_views.xml",
     ],
     "installable": True,
     "application": False,
