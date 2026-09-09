@@ -142,4 +142,4 @@ odoo-bin -d <base> -i account_journal_tax_policy,sale_journal_tax_policy --test-
 
 ## Autor
 
-[Aceleradora-Latam](https://github.com/aceleradora-la)
+[aceleradora.la](https://aceleradora.la)

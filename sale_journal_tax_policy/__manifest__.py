@@ -3,8 +3,8 @@
     "version": "19.0.1.0.0",
     "category": "Sales/Sales",
     "summary": "Apply the tax policy of the invoicing journal to sales orders",
-    "author": "Aceleradora-Latam",
-    "website": "https://github.com/aceleradora-la/odoo-journal-tax-policy",
+    "author": "aceleradora.la",
+    "website": "https://aceleradora.la",
     "license": "AGPL-3",
     "depends": ["account_journal_tax_policy", "sale"],
     "data": [
