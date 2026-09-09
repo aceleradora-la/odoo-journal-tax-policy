@@ -11,7 +11,6 @@ class AccountMove(models.Model):
     taxes_removed_by_journal = fields.Boolean(
         string="Taxes Removed by Journal",
         copy=False,
-        readonly=True,
         help="Technical flag telling that the taxes of this document were "
         "removed because of the tax policy of its journal. It is what lets us "
         "restore the standard taxes if the journal is changed back.",

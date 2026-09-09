@@ -222,3 +222,44 @@ class TestAccountJournalTaxPolicy(AccountTestInvoicingCommon):
         invoice._apply_journal_tax_policy()
 
         self.assertEqual(invoice.invoice_line_ids.tax_ids, self.tax_sale_a)
+
+    # ------------------------------------------------------------------
+    # Regression: the journal switched twice before saving
+    # ------------------------------------------------------------------
+
+    def test_journal_toggled_twice_on_a_new_invoice(self):
+        """Switch away and back on an invoice that was never saved.
+
+        The flag that remembers we emptied the taxes has to survive the
+        onchange round trip, which is why it sits in the form view as an
+        invisible field.
+        """
+        move_form = Form(
+            self.env["account.move"]
+            .with_company(self.company_data["company"])
+            .with_context(default_move_type="out_invoice")
+        )
+        move_form.partner_id = self.partner_a
+        move_form.journal_id = self.sale_journal
+        with move_form.invoice_line_ids.new() as line_form:
+            line_form.product_id = self.product_a
+            line_form.price_unit = 100.0
+
+        move_form.journal_id = self.no_tax_sale_journal
+        move_form.journal_id = self.sale_journal
+        invoice = move_form.save()
+
+        self.assertEqual(invoice.invoice_line_ids.tax_ids, self.tax_sale_a)
+        self.assertFalse(invoice.taxes_removed_by_journal)
+
+    def test_journal_toggled_twice_on_a_saved_invoice(self):
+        """Same round trip, starting from an invoice that already exists."""
+        invoice = self._create_invoice(self.sale_journal)
+
+        move_form = Form(invoice)
+        move_form.journal_id = self.no_tax_sale_journal
+        move_form.journal_id = self.sale_journal
+        invoice = move_form.save()
+
+        self.assertEqual(invoice.invoice_line_ids.tax_ids, self.tax_sale_a)
+        self.assertFalse(invoice.taxes_removed_by_journal)

@@ -1,6 +1,6 @@
 from odoo import Command
 from odoo.addons.account.tests.common import AccountTestInvoicingCommon
-from odoo.tests import tagged
+from odoo.tests import Form, tagged
 
 
 @tagged("post_install", "-at_install")
@@ -22,6 +22,14 @@ class TestSaleJournalTaxPolicy(AccountTestInvoicingCommon):
         # Invoice on ordered quantities so that _create_invoices() has
         # something to work with without the stock module around.
         cls.product_a.invoice_policy = "order"
+
+        # sale.order.journal_id is flagged groups="base.group_no_one", so the
+        # form view only carries it for users in that group. Odoo renamed the
+        # field holding a user's groups in 19.0, hence the lookup.
+        groups_field = (
+            "group_ids" if "group_ids" in cls.env.user._fields else "groups_id"
+        )
+        cls.env.user.sudo()[groups_field] |= cls.env.ref("base.group_no_one")
 
     def _create_order(self, journal=None, partner=None, line_vals=None, with_line=True):
         vals = {
@@ -165,3 +173,39 @@ class TestSaleJournalTaxPolicy(AccountTestInvoicingCommon):
         self.assertEqual(invoice.journal_id, self.no_tax_journal)
         self.assertFalse(invoice.invoice_line_ids.tax_ids)
         self.assertEqual(invoice.amount_total, invoice.amount_untaxed)
+
+    # ------------------------------------------------------------------
+    # Regression: the journal switched twice before saving
+    # ------------------------------------------------------------------
+
+    def test_journal_toggled_twice_on_a_new_order(self):
+        """Switch away and back on an order that was never saved.
+
+        The flag that remembers we emptied the taxes has to survive the
+        onchange round trip, which is why it sits in the form view as an
+        invisible field.
+        """
+        order_form = Form(self.env["sale.order"].with_company(self.company))
+        order_form.partner_id = self.partner_a
+        order_form.journal_id = self.sale_journal
+        with order_form.order_line.new() as line_form:
+            line_form.product_id = self.product_a
+
+        order_form.journal_id = self.no_tax_journal
+        order_form.journal_id = self.sale_journal
+        order = order_form.save()
+
+        self.assertEqual(order.order_line.tax_id, self.tax_sale_a)
+        self.assertFalse(order.taxes_removed_by_journal)
+
+    def test_journal_toggled_twice_on_a_saved_order(self):
+        """Same round trip, starting from an order that already exists."""
+        order = self._create_order(self.sale_journal)
+
+        order_form = Form(order)
+        order_form.journal_id = self.no_tax_journal
+        order_form.journal_id = self.sale_journal
+        order = order_form.save()
+
+        self.assertEqual(order.order_line.tax_id, self.tax_sale_a)
+        self.assertFalse(order.taxes_removed_by_journal)

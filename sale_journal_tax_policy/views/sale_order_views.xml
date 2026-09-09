@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_order_form" model="ir.ui.view">
+        <field name="name">sale.order.form.tax.policy</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+            <!-- Nothing is displayed here, see the comment in
+                 account_journal_tax_policy/views/account_move_views.xml.
+
+                 journal_id itself carries groups="base.group_no_one", but none
+                 of its ancestors do, so our field lands in an unrestricted
+                 group and every user gets it. -->
+            <field name="journal_id" position="after">
+                <field name="taxes_removed_by_journal" invisible="1"/>
+            </field>
+        </field>
+    </record>
+
+</odoo>

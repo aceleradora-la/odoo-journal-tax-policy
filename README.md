@@ -40,20 +40,24 @@ nada: la columna de impuestos simplemente queda vacía.
 
 Los documentos ya publicados no se tocan.
 
-### Hay que guardar para que se restauren los impuestos
+### El campo técnico invisible
 
-Los puntos 1 y 2 (quitar impuestos) funcionan siempre, guardado o no. El punto 3
-(**devolverlos**) necesita que el documento haya sido guardado al menos una vez con el
-diario sin impuestos.
+Los dos módulos agregan al formulario de la factura y al del pedido un único campo:
 
-El motivo es el protocolo de `onchange` de Odoo: solo viajan de ida y vuelta al navegador
-los campos que están en la vista, y la marca técnica que recuerda "estos impuestos los
-sacamos nosotros" está deliberadamente fuera de la vista. En un documento nunca guardado
-esa marca se pierde entre un `onchange` y el siguiente, así que al volver a un diario
-normal las líneas quedan sin impuestos hasta que se guarde y se vuelva a cambiar el diario.
+```xml
+<field name="taxes_removed_by_journal" invisible="1"/>
+```
 
-Se podría evitar agregando el campo técnico a la vista como `invisible="1"`, a costa de
-tocar el formulario de la factura. Se optó por no hacerlo.
+No muestra absolutamente nada: sin etiqueta, sin espacio, invisible de verdad. Está ahí
+porque el protocolo de `onchange` de Odoo solo hace ida y vuelta con el navegador usando
+**los campos que están en la vista**.
+
+Sin ese campo, la secuencia *diario sin impuestos → diario normal → guardar*, hecha sin
+guardar en el medio, dejaba el documento sin impuestos de forma permanente: la marca que
+recuerda "estos impuestos los sacamos nosotros" se perdía entre un `onchange` y el
+siguiente, y al guardar el servidor recibía un diario normal con líneas de impuestos
+vacíos, indistinguible de "el usuario los borró a mano". No hay forma de arreglarlo solo
+del lado del servidor, porque el paso intermedio nunca llega a la base de datos.
 
 ### Precio unitario
 
@@ -99,7 +103,8 @@ importación o la API.
 
 El campo técnico `taxes_removed_by_journal` (en `account.move` y en `sale.order`) recuerda
 que fuimos nosotros los que vaciamos los impuestos, y es lo que permite restaurarlos si el
-diario vuelve a cambiar.
+diario vuelve a cambiar. Va en la vista como campo invisible para que sobreviva a los
+`onchange`, ver [arriba](#el-campo-técnico-invisible).
 
 ## Ramas
 

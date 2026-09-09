@@ -7,7 +7,6 @@ class SaleOrder(models.Model):
     taxes_removed_by_journal = fields.Boolean(
         string="Taxes Removed by Journal",
         copy=False,
-        readonly=True,
         help="Technical flag telling that the taxes of this order were removed "
         "because of the tax policy of its invoicing journal. It is what lets us "
         "restore the standard taxes if the journal is changed back.",
