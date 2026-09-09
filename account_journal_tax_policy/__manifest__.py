@@ -3,8 +3,8 @@
     "version": "18.0.1.0.0",
     "category": "Accounting/Accounting",
     "summary": "Decide per sales/purchase journal whether its documents carry taxes",
-    "author": "Aceleradora-Latam",
-    "website": "https://github.com/aceleradora-la/odoo-journal-tax-policy",
+    "author": "aceleradora.la",
+    "website": "https://aceleradora.la",
     "license": "AGPL-3",
     "depends": ["account"],
     "data": [
